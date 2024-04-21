@@ -180,6 +180,12 @@ def forecast():
     # Predict issues for test data
     y_pred = model.predict(X_test)
 
+    future_days = pd.date_range(start=days.max() + timedelta(days=1), periods=365, freq='D')
+    y_pred_rescaled = scaler.inverse_transform(y_pred)
+    max_pred_day_index = np.argmax(y_pred_rescaled)
+    max_pred_day = future_days[max_pred_day_index]
+    day_of_week = max_pred_day.strftime('%A')
+
     # Plot the LSTM Generated image
     fig, axs = plt.subplots(1, 1, figsize=(10, 4))
     X = mdates.date2num(days)
@@ -223,6 +229,7 @@ def forecast():
 
     # Construct the response
     json_response = {
+        "day_of_week_max_issues": day_of_week,
         "model_loss_image_url": MODEL_LOSS_URL,
         "lstm_generated_image_url": LSTM_GENERATED_URL,
         "all_issues_data_image": ALL_ISSUES_DATA_URL
